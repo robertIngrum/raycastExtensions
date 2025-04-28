@@ -1,8 +1,44 @@
-import { Detail } from "@raycast/api";
-import { useAI } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Form } from "@raycast/api";
+import { useForm, FormValidation } from "@raycast/utils";
+import { useState } from "react";
+
+interface ChatFormValues {
+	message: string;
+}
 
 export default function Command() {
-  const { data, isLoading } = useAI("Suggest 5 jazz songs");
+	const [response, setResponse] = useState("");
 
-  return <Detail isLoading={isLoading} markdown={data} />;
+	const { handleSubmit, itemProps } = useForm<ChatFormValues>({
+		onSubmit(values) {
+			setResponse("Yay");
+		},
+		validation: {
+			message: FormValidation.Required,
+		},
+	});
+
+	if (response)
+		return <Detail 
+			markdown={response} 
+			actions={
+				<ActionPanel title="Message Response">
+					<Action title="New Message" onAction={() => setResponse("")} shortcut={{ modifiers: ["cmd"], key: "n" }} />
+				</ActionPanel>
+			}
+		/>;
+
+  return (
+		<>
+			<Form
+				actions={
+					<ActionPanel>
+						<Action.SubmitForm title="Submit" onSubmit={handleSubmit} shortcut={{ modifiers: [], key: "enter" }} />
+					</ActionPanel>
+				}
+			>
+				<Form.TextField title="Message" placeholder="What's Up?" {...itemProps.message} />
+			</Form>
+		</>
+	);
 }
